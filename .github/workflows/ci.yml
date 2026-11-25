@@ -27,13 +27,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          
 
       - name: Instalar dependencias de validación y empaquetado (si existe package.json)
         run: |
           if [ -f "package.json" ]; then
-            npm ci
-          else
+            npm ci 
+            elif [ -f "packege.json" ]; then
+            nmp install
+            else
             npm install --no-save htmlhint eslint serve
           fi
 
