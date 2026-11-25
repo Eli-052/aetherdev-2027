@@ -33,8 +33,6 @@ jobs:
         run: |
           if [ -f "package.json" ]; then
             npm ci 
-            elif [ -f "packege.json" ]; then
-            nmp install
             else
             npm install --no-save htmlhint eslint serve
           fi
@@ -64,8 +62,8 @@ jobs:
         run: |
           npx serve . -l 4173 &
           SERVER_PID=$!
-          sleep 2
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4173/index.html)
+          sleep 3
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4173/)
           kill $SERVER_PID || true
           if [ "$STATUS_CODE" -ne 200 ]; then
             echo "❌ Error: El servidor local respondió con código $STATUS_CODE"
