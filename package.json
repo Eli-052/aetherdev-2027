@@ -10,8 +10,20 @@
     "serve": "serve . -l 4173"
   },
   "devDependencies": {
-    "eslint": "^9.0.0",
-    "htmlhint": "^1.1.4",
-    "serve": "^14.2.4"
-  }
+    "eslint": "^8.57.1",
+    "htmlhint": "^1.9.2",
+    "serve": "^14.2.8"
+  },
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eli-052/aetherdev-2027.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Eli-052/aetherdev-2027/issues"
+  },
+  "homepage": "https://github.com/Eli-052/aetherdev-2027#readme"
 }
