@@ -1,0 +1,17 @@
+{
+  "name": "aetherdev-labs-2027",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sitio web corporativo e interactivo de ingeniería y arquitectura 2027",
+  "scripts": {
+    "lint:html": "htmlhint index.html",
+    "lint:js": "eslint app.js --no-eslintrc --env browser,es2022 --parser-options=ecmaVersion:2022",
+    "check:js": "node --check app.js",
+    "serve": "serve . -l 4173"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "htmlhint": "^1.1.4",
+    "serve": "^14.2.4"
+  }
+}

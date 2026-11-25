@@ -1,0 +1,87 @@
+name: CI - AetherDev Labs Web
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+# Permisos base seguros para validación; deploy se solicitará explícitamente en el job de despliegue
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-and-validation:
+    name: Validar HTML, CSS, JS y Estructura
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js y caché de npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalar dependencias de validación y empaquetado (si existe package.json)
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci
+          else
+            npm install --no-save htmlhint eslint serve
+          fi
+
+      - name: Verificar archivos esenciales del proyecto
+        run: |
+          for file in index.html styles.css app.js AGENTS.md; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Error: Falta el archivo obligatorio $file"
+              exit 1
+            fi
+          done
+          echo "✔ Todos los archivos estructurales están presentes."
+
+      - name: Validar sintaxis de JavaScript (app.js)
+        run: |
+          node --check app.js
+          echo "✔ Sintaxis de app.js válida."
+
+      - name: Ejecutar Linters (HTMLHint y ESLint)
+        run: |
+          npx htmlhint index.html
+          npx eslint app.js --no-eslintrc --env browser,es2022 --parser-options=ecmaVersion:2022
+          echo "✔ Validación estática completada."
+
+      - name: Prueba de humo (Smoke Test) en servidor local
+        run: |
+          npx serve . -l 4173 &
+          SERVER_PID=$!
+          sleep 2
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4173/index.html)
+          kill $SERVER_PID || true
+          if [ "$STATUS_CODE" -ne 200 ]; then
+            echo "❌ Error: El servidor local respondió con código $STATUS_CODE"
+            exit 1
+          fi
+          echo "✔ Sitio web servido correctamente (HTTP 200)."
+
+      - name: Preparar artefacto de despliegue para GitHub Actions
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          mkdir -p dist
+          cp index.html styles.css app.js dist/
+          echo "✔ Artefacto listo en ./dist para el siguiente job de deploy."
+
+      - name: Subir artefacto de sitio estático (actions/upload-artifact)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: aetherdev-web-dist
+          path: dist/
+          retention-days: 7
